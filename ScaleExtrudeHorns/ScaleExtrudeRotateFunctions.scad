@@ -1,14 +1,15 @@
-rotX=-45;
-rotY=20;
+rotX=0;
+rotY=0;
 rotZ=90;
 
 large=40;
-endScale=1;
 height=large;
 
-steps=40;
+steps=160;
 
-module horn(endScale,height,rot_x,rot_y,rot_z)
+function scaleFunction(i)=abs(1*sin(i/steps*180))+0.2;
+
+module horn(height,rot_x,rot_y,rot_z)
 {
 	union()
 	{
@@ -22,32 +23,27 @@ module horn(endScale,height,rot_x,rot_y,rot_z)
 				center = true, 
 				convexity = 10,
 				twist = -rot_z/steps)
-			scale(1-endScale*i/steps)
+			scale(scaleFunction(i))
 			child(0);
 		}
 	}
 }
 
-translate([0,-large*cos(rotX)/2,0])
-rotate([-rotX,0,0])
+
+horn(height,rotX,rotY,rotZ)
 union()
 {
-	horn(endScale,height,rotX,rotY,rotZ)
-	square(large,true);
-	
-	mirror([0,0,1])
-	horn(endScale,large/2,0,0,0)
-	square(large,true);
-}
+	rotate([0,0,45])
+	square(large/2,true);
 
-translate([0,large*cos(rotX)/2,0])
-rotate([-rotX,0,180])
-union()
-{
-	horn(endScale,height,rotX,-rotY,-rotZ)
-	square(large,true);
+	square([large,large/10]);
 
-	mirror([0,0,1])
-	horn(endScale,large/2,0,0,0)
-	square(large,true);
+	rotate([0,0,90])
+	square([large,large/10]);
+
+	rotate([0,0,180])
+	square([large,large/10]);
+
+	rotate([0,0,270])
+	square([large,large/10]);
 }
