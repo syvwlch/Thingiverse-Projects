@@ -1,4 +1,4 @@
-scale=1.1;
+scale=1;
 
 steps=72;
 
@@ -37,7 +37,7 @@ module slice(Xa, Ya, Za, Xb, Yb, Zb, radiusa, radiusb)
 
 function 	X(i)=		scale*(1+30*i)*cos(i*180);
 function 	Y(i)=		scale*(1+30*i)*sin(i*180);
-function 	Z(i)=		scale*(30*i*i-10*i)*sin(i*720);
+function 	Z(i)=		scale*(30*i)*sin(i*720);
 
 function 	size(i)=	1+5*scale*i;
 
