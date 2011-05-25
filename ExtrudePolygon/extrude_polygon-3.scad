@@ -30,7 +30,7 @@ module slice(Xa, Ya, Za, Xb, Yb, Zb, radiusa, radiusb)
 		[ 3, 4, 5 ]
 		 ];
 	
-	color([(radiusa)/24/scale,(radiusa)/24/scale,(radiusa)/24/scale])
+	//color([(radiusa)/24/scale,(radiusa)/24/scale,(radiusa)/24/scale])
 	polyhedron( polyPoints, polyTriangles );
 }
 
@@ -57,5 +57,12 @@ module corkscrew()
 	}
 }
 
+difference()
+{
+	translate([0,0,-38])
+	corkscrew();
 
-corkscrew();
+	translate([10,-20,0])
+	scale([1,1,0.5])
+	sphere(48);
+}
