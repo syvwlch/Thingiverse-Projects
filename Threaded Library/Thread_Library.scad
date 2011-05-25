@@ -74,7 +74,7 @@ module trapezoidThread(
 	profileRatio=0.5,			// ratio between the lengths of the raised part of the profile and the pitch
 						// std value for Acme or metric lead screw is 0.5
 	RH=true,				// true/false the thread winds clockwise looking along shaft, i.e.follows the Right Hand Rule
-	clearance=0.1,			// radial clearance, normalized to pitchRadius
+	clearance=0.1,			// radial clearance, normalized to thread height
 	backlash=0.1,			// axial clearance, normalized to pitch
 	stepsPerTurn=24			// number of slices to create per turn
 		)
@@ -94,15 +94,52 @@ module trapezoidThread(
 	function	pitchRadius(i)=		pitchRadius;
 	function	minorRadius(i)=		pitchRadius(i)-0.5*threadHeight(i);
 	
-	function 	X(i)=				minorRadius(i)*cos(i*360*numberTurns*(RH==true ? 1 : -1));
-	function 	Y(i)=				minorRadius(i)*sin(i*360*numberTurns*(RH==true ? 1 : -1));
+	function 	X(i)=				minorRadius(i)*cos(i*360*numberTurns);
+	function 	Y(i)=				minorRadius(i)*sin(i*360*numberTurns);
 	function 	Z(i)=				pitch*numberTurns*i;
 
 	function	tip(i)=			trapezoidRatio*(1-0.5*sin(threadAngleTop(i))+0.5*sin(threadAngleBottom(i)));
 
 	// this is the threaded rod
 
+	if (RH==true)
 	translate([0,0,-threadHeight(0)*sin(threadAngleBottom(0))])
+	for (i=[0:steps-1])
+	{
+		threadPiece(
+			Xa=				X(i/steps),
+			Ya=				Y(i/steps),
+			Za=				Z(i/steps),
+			Xb=				X((i+1)/steps),
+			Yb=				Y((i+1)/steps), 
+			Zb=				Z((i+1)/steps), 
+			radiusa=			threadHeight(i/steps), 
+			radiusb=			threadHeight((i+1)/steps),
+			tipRatioa=			tip(i/steps),
+			tipRatiob=			tip((i+1)/steps),
+			threadAngleTop=		threadAngleTop(i), 
+			threadAngleBottom=	threadAngleBottom(i)
+			);
+
+		shaftPiece(
+			Xa=				X(i/steps),
+			Ya=				Y(i/steps),
+			Za=				Z(i/steps),
+			Xb=				X((i+1)/steps),
+			Yb=				Y((i+1)/steps), 
+			Zb=				Z((i+1)/steps), 
+			radiusa=			threadHeight(i/steps), 
+			radiusb=			threadHeight((i+1)/steps),
+			tipRatioa=			tip(i/steps),
+			tipRatiob=			tip((i+1)/steps),
+			threadAngleTop=		threadAngleTop(i), 
+			threadAngleBottom=	threadAngleBottom(i)
+			);
+	}
+
+	if (RH==false)
+	translate([0,0,-threadHeight(0)*sin(threadAngleBottom(0))])
+	mirror([0,1,0])
 	for (i=[0:steps-1])
 	{
 		threadPiece(
@@ -139,8 +176,8 @@ module trapezoidThread(
 	rotate([0,0,180/stepsPerTurn])
 	cylinder(
 		h=length+threadHeight(1)*(tip(1)+sin( threadAngleTop(1) )-1*sin( threadAngleBottom(1) ) ),
-		r1=minorRadius(0)*(1-clearance/pitchRadius),
-		r2=minorRadius(0)*(1-clearance/pitchRadius),
+		r1=minorRadius(0)-clearance*threadHeight(0),
+		r2=minorRadius(0)-clearance*threadHeight(0),
 		$fn=stepsPerTurn
 			);
 }
