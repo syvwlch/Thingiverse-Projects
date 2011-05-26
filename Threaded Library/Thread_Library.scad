@@ -184,6 +184,60 @@ module trapezoidThread(
 			);
 }
 
+module trapezoidThreadNegativeSpace(
+	length=45,				// axial length of the threaded rod
+	pitch=10,				// axial distance from crest to crest
+	pitchRadius=10,			// radial distance from center to mid-profile
+	threadHeightToPitch=0.5,	// ratio between the height of the profile and the pitch
+						// std value for Acme or metric lead screw is 0.5
+	profileRatio=0.5,			// ratio between the lengths of the raised part of the profile and the pitch
+						// std value for Acme or metric lead screw is 0.5
+	threadAngle=30,			// angle between the two faces of the thread
+						// std value for Acme is 29 or for metric lead screw is 30
+	RH=true,				// true/false the thread winds clockwise looking along shaft, i.e.follows the Right Hand Rule
+	countersunk=0,			// depth of 45 degree chamfered entries, normalized to pitch
+	clearance=0.1,			// radial clearance, normalized to thread height
+	backlash=0.1,			// axial clearance, normalized to pitch
+	stepsPerTurn=24			// number of slices to create per turn
+		)
+{
+
+	translate([0,0,-countersunk*pitch])	
+	cylinder(
+		h=2*countersunk*pitch, 
+		r2=pitchRadius+clearance*pitch+0.25*pitch,
+		r1=pitchRadius+clearance*pitch+0.25*pitch+countersunk*pitch,
+		$fn=24
+			);
+
+	translate([0,0,countersunk*pitch])	
+	translate([0,0,-pitch])
+	trapezoidThread(
+		length=length+pitch, 				// axial length of the threaded rod 
+		pitch=pitch, 					// axial distance from crest to crest
+		pitchRadius=pitchRadius+clearance*pitch, 	// radial distance from center to mid-profile
+		threadHeightToPitch=threadHeightToPitch, 	// ratio between the height of the profile and the pitch 
+									// std value for Acme or metric lead screw is 0.5
+		profileRatio=profileRatio, 			// ratio between the lengths of the raised part of the profile and the pitch
+									// std value for Acme or metric lead screw is 0.5
+		threadAngle=threadAngle,			// angle between the two faces of the thread
+									// std value for Acme is 29 or for metric lead screw is 30
+		RH=true, 						// true/false the thread winds clockwise looking along shaft
+									// i.e.follows  Right Hand Rule
+		clearance=0, 					// radial clearance, normalized to thread height
+		backlash=-backlash, 				// axial clearance, normalized to pitch
+		stepsPerTurn=stepsPerTurn 			// number of slices to create per turn
+			);	
+
+	translate([0,0,length-countersunk*pitch])
+	cylinder(
+		h=2*countersunk*pitch, 
+		r1=pitchRadius+clearance*pitch+0.25*pitch,
+		r2=pitchRadius+clearance*pitch+0.25*pitch+countersunk*pitch,$fn=24,
+		$fn=24
+			);
+}
+
 module trapezoidNut(
 	length=45,				// axial length of the threaded rod
 	radius=25,				// outer radius of the nut
@@ -196,43 +250,25 @@ module trapezoidNut(
 	threadAngle=30,			// angle between the two faces of the thread
 						// std value for Acme is 29 or for metric lead screw is 30
 	RH=true,				// true/false the thread winds clockwise looking along shaft, i.e.follows the Right Hand Rule
-	countersunk=0.5,			// depth of 45 degree countersunk entries, normalized to pitch
+	countersunk=0,			// depth of 45 degree chamfered entries, normalized to pitch
 	clearance=0.1,			// radial clearance, normalized to thread height
 	backlash=0.1,			// axial clearance, normalized to pitch
 	stepsPerTurn=24			// number of slices to create per turn
 		)
 {
-	difference()
-	{
-		cylinder(
-			h=countersunk*pitch, 
-			r1=radius, 
-			r2=radius,
-			$fn=6
-				);
-
-		cylinder(
-			h=countersunk*pitch, 
-			r1=pitchRadius+clearance*pitch+0.5*pitch,
-			r2=pitchRadius+clearance*pitch+0.5*pitch*countersunk,$fn=24
-				);
-	}
-
-	translate([0,0,countersunk*pitch])
 	difference() 
 	{
 		cylinder(
-			h=length-2*countersunk*pitch,
+			h=length,
 			r1=radius, 
 			r2=radius,
 			$fn=6
 				);
 		
-		translate([0,0,-pitch])
-		trapezoidThread(
-			length=length+pitch, 				// axial length of the threaded rod 
+		trapezoidThreadNegativeSpace(
+			length=length, 					// axial length of the threaded rod 
 			pitch=pitch, 					// axial distance from crest to crest
-			pitchRadius=pitchRadius+clearance*pitch, 	// radial distance from center to mid-profile
+			pitchRadius=pitchRadius, 			// radial distance from center to mid-profile
 			threadHeightToPitch=threadHeightToPitch, 	// ratio between the height of the profile and the pitch 
 										// std value for Acme or metric lead screw is 0.5
 			profileRatio=1-profileRatio, 			// ratio between the lengths of the raised part of the profile and the pitch
@@ -241,27 +277,10 @@ module trapezoidNut(
 										// std value for Acme is 29 or for metric lead screw is 30
 			RH=true, 						// true/false the thread winds clockwise looking along shaft
 										// i.e.follows  Right Hand Rule
+			countersunk=countersunk,			// depth of 45 degree countersunk entries, normalized to pitch
 			clearance=0, 					// radial clearance, normalized to thread height
 			backlash=-backlash, 				// axial clearance, normalized to pitch
 			stepsPerTurn=stepsPerTurn 			// number of slices to create per turn
 				);	
-	}
-	
-	translate([0,0,length-countersunk*pitch])
-	difference()
-	{
-		cylinder(
-			h=countersunk*pitch,
-			r1=radius,
-			r2=radius,
-			$fn=6
-				);
-
-		cylinder(
-			h=countersunk*pitch, 
-			r1=pitchRadius+clearance*pitch+0.5*pitch*countersunk, 
-			r2=pitchRadius+clearance*pitch+0.5*pitch,
-			$fn=24
-				);
 	}
 }

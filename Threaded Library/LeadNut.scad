@@ -13,7 +13,7 @@ trapezoidNut(
 	threadAngle=30, 			// angle between the two faces of the thread 
 						// std value for Acme is 29 or for metric lead screw is 30
 	RH=true, 				// true/false the thread winds clockwise looking along shaft, i.e.follows the Right Hand Rule
-	countersunk=0.5, 		// depth of 45 degree countersunk entries, normalized to pitch
+	countersunk=0.5, 		// depth of 45 degree chamfered entries, normalized to pitch
 	clearance=0.1, 			// radial clearance, normalized to thread height
 	backlash=0.1, 			// axial clearance, normalized to pitch
 	stepsPerTurn=24 			// number of slices to create per turn
