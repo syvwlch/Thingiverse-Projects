@@ -8,7 +8,7 @@ trapezoidNut(
 	pitchRadius=20, 			// radial distance from center to mid-profile
 	threadHeightToPitch=0.5,	// ratio between the height of the profile and the pitch
 						// std value for Acme or metric lead screw is 0.5
-	profileRatio=0.25, 			// ratio between the lengths of the raised part of the profile and the pitch
+	profileRatio=0.5, 			// ratio between the lengths of the raised part of the profile and the pitch
 						// std value for Acme or metric lead screw is 0.5
 	threadAngle=30, 			// angle between the two faces of the thread 
 						// std value for Acme is 29 or for metric lead screw is 30
