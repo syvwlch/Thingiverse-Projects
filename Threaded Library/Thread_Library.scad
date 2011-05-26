@@ -278,7 +278,7 @@ module trapezoidNut(
 			RH=true, 						// true/false the thread winds clockwise looking along shaft
 										// i.e.follows  Right Hand Rule
 			countersunk=countersunk,			// depth of 45 degree countersunk entries, normalized to pitch
-			clearance=0, 					// radial clearance, normalized to thread height
+			clearance=clearance, 				// radial clearance, normalized to thread height
 			backlash=backlash, 				// axial clearance, normalized to pitch
 			stepsPerTurn=stepsPerTurn 			// number of slices to create per turn
 				);	
