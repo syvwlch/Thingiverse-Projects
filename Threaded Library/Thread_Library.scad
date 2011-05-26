@@ -206,14 +206,14 @@ module trapezoidThreadNegativeSpace(
 	cylinder(
 		h=2*countersunk*pitch, 
 		r2=pitchRadius+clearance*pitch+0.25*pitch,
-		r1=pitchRadius+clearance*pitch+0.25*pitch+countersunk*pitch,
+		r1=pitchRadius+clearance*pitch+0.25*pitch+2*countersunk*pitch,
 		$fn=24
 			);
 
 	translate([0,0,countersunk*pitch])	
 	translate([0,0,-pitch])
 	trapezoidThread(
-		length=length+pitch, 				// axial length of the threaded rod 
+		length=length+0.5*pitch, 				// axial length of the threaded rod 
 		pitch=pitch, 					// axial distance from crest to crest
 		pitchRadius=pitchRadius+clearance*pitch, 	// radial distance from center to mid-profile
 		threadHeightToPitch=threadHeightToPitch, 	// ratio between the height of the profile and the pitch 
@@ -233,7 +233,7 @@ module trapezoidThreadNegativeSpace(
 	cylinder(
 		h=2*countersunk*pitch, 
 		r1=pitchRadius+clearance*pitch+0.25*pitch,
-		r2=pitchRadius+clearance*pitch+0.25*pitch+countersunk*pitch,$fn=24,
+		r2=pitchRadius+clearance*pitch+0.25*pitch+2*countersunk*pitch,$fn=24,
 		$fn=24
 			);
 }
