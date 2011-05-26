@@ -271,7 +271,7 @@ module trapezoidNut(
 			pitchRadius=pitchRadius, 			// radial distance from center to mid-profile
 			threadHeightToPitch=threadHeightToPitch, 	// ratio between the height of the profile and the pitch 
 										// std value for Acme or metric lead screw is 0.5
-			profileRatio=1-profileRatio, 			// ratio between the lengths of the raised part of the profile and the pitch
+			profileRatio=profileRatio, 			// ratio between the lengths of the raised part of the profile and the pitch
 										// std value for Acme or metric lead screw is 0.5
 			threadAngle=threadAngle,			// angle between the two faces of the thread
 										// std value for Acme is 29 or for metric lead screw is 30
@@ -279,7 +279,7 @@ module trapezoidNut(
 										// i.e.follows  Right Hand Rule
 			countersunk=countersunk,			// depth of 45 degree countersunk entries, normalized to pitch
 			clearance=0, 					// radial clearance, normalized to thread height
-			backlash=-backlash, 				// axial clearance, normalized to pitch
+			backlash=backlash, 				// axial clearance, normalized to pitch
 			stepsPerTurn=stepsPerTurn 			// number of slices to create per turn
 				);	
 	}
