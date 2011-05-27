@@ -318,9 +318,12 @@ module trapezoidNut(
 }
 
 module trapezoidThreadThroated(
-	length=45,				// axial length of the threaded rod
+	length=50,				// axial length of the threaded rod
 	pitch=10,				// axial distance from crest to crest
 	pitchRadius=10,			// radial distance from center to mid-profile
+	throatDistance=20,		// radial distance to center of curvature of throat
+	throatRadius=10,			// radius of curvature of throat
+	throatHeight=25,			// axial distance to center of curvature of throat
 	threadHeightToPitch=0.5,	// ratio between the height of the profile and the pitch
 						// std value for Acme or metric lead screw is 0.5
 	profileRatio=0.5,			// ratio between the lengths of the raised part of the profile and the pitch
@@ -345,7 +348,12 @@ module trapezoidThreadThroated(
 
 	function 	threadHeight(i)=		pitch*threadHeightToPitch;
 
-	function	pitchRadius(i)=		pitchRadius;						// This is where the throating happens
+	// This is where the throating happens
+	function	pitchRadius(i)=		min	(
+						pitchRadius,
+						throatDistance- sqrt ( throatRadius*throatRadius - (Z(i)-throatHeight)*(Z(i)-throatHeight) )
+								);	
+			
 	function	minorRadius(i)=		pitchRadius(i)-0.5*threadHeight(i);
 	
 	function 	X(i)=				minorRadius(i)*cos(i*360*numberTurns);
