@@ -73,27 +73,33 @@ module slice(
 
 function 	size(i)=	10*scale*abs(1.1+cos(i*327));
 
-function 	X(i)=		(size(i))*cos(i*360*numberTurns);
-function 	Y(i)=		(size(i))*sin(i*360*numberTurns);
-function 	Z(i)=		scale*10*numberTurns*i;
+function 	ShaftX(i)=		scale*0*numberTurns*i;
+function 	ShaftY(i)=		scale*0*numberTurns*i;
+function 	ShaftZ(i)=		scale*10*numberTurns*i;
+
+function 	X(i)=		ShaftX(i)+(size(i))*cos(i*360*numberTurns);
+function 	Y(i)=		ShaftY(i)+(size(i))*sin(i*360*numberTurns);
+function 	Z(i)=		ShaftZ(i);
 
 module corkscrew()
 {
 	for (i=[0:steps-1])
 	{
 slice(
-	AShaftBottom=	[0,					0,						Z(i/steps)					],
-	AShaftTop=		[0,					0,						Z((i+stepsPerTurn)/steps)		],
-	BShaftBottom=	[0,					0,						Z((i+1)/steps)				],
-	BShaftTop=		[0,					0,						Z((i+1+stepsPerTurn)/steps)		],
-	ABottom=		[X(i/steps),				Y(i/steps),					Z(i/steps)					],
-	ATop=		[X((i+stepsPerTurn)/steps),	Y((i+stepsPerTurn)/steps),		Z((i+stepsPerTurn)/steps)		],
-	BBottom=		[X((i+1)/steps),			Y((i+1)/steps),				Z((i+1)/steps)				],
-	BTop=		[X((i+1+stepsPerTurn)/steps),	Y((i+1+stepsPerTurn)/steps),		Z((i+1+stepsPerTurn)/steps)		],
+	AShaftBottom=	[ShaftX(i/steps),				ShaftY(i/steps),				ShaftZ(i/steps)				],
+	AShaftTop=		[ShaftX((i+stepsPerTurn)/steps),	ShaftY((i+stepsPerTurn)/steps),	ShaftZ((i+stepsPerTurn)/steps)	],
+	BShaftBottom=	[ShaftX((i+1)/steps),			ShaftY((i+1)/steps),			ShaftZ((i+1)/steps)			],
+	BShaftTop=		[ShaftX((i+1+stepsPerTurn)/steps),	ShaftY((i+1+stepsPerTurn)/steps),	ShaftZ((i+1+stepsPerTurn)/steps)	],
+	ABottom=		[X(i/steps),					Y(i/steps),					Z(i/steps)					],
+	ATop=		[X((i+stepsPerTurn)/steps),		Y((i+stepsPerTurn)/steps),		Z((i+stepsPerTurn)/steps)		],
+	BBottom=		[X((i+1)/steps),				Y((i+1)/steps),				Z((i+1)/steps)				],
+	BTop=		[X((i+1+stepsPerTurn)/steps),		Y((i+1+stepsPerTurn)/steps),		Z((i+1+stepsPerTurn)/steps)		],
+
 	AThreadDepth=	min(30*min(i,steps-i)/steps,3),	
 	AThreadRatio=	0.5,
 	AThreadPosition=	0.25,
 	AThreadAngle=	20,
+
 	BThreadDepth=	min(30*min(i+1,steps-i-1)/steps,3),
 	BThreadRatio=	0.5,
 	BThreadPosition=	0.25,
