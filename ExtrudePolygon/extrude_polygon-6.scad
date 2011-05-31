@@ -71,7 +71,7 @@ module slice(
 }
 
 
-function 	size(i)=	10*scale*abs(1.1+cos(i*327));
+function 	size(i)=	20*scale*i;
 
 function 	ShaftX(i)=		scale*0*numberTurns*i;
 function 	ShaftY(i)=		scale*0*numberTurns*i;
