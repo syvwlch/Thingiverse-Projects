@@ -1,94 +1,66 @@
-module threadPiece(Xa, Ya, Za, Xb, Yb, Zb, radiusa, radiusb, tipRatioa, tipRatiob, threadAngleTop, threadAngleBottom)
-{	
-	angleZ=atan2(Ya, Xa);
-	twistZ=atan2(Yb, Xb)-atan2(Ya, Xa);
 
+function norm(vector) = sqrt(vector[0]*vector[0]+vector[1]*vector[1]+vector[2]*vector[2]); 
+
+function unitVector(vector) = vector / norm ( vector );
+
+function barycenter(vector1, vector2, ratio) = (vector1*ratio + vector2*(1-ratio) );
+
+module slice( 
+	AShaftBottom,
+	AShaftTop,
+	BShaftBottom,
+	BShaftTop,
+	ABottom,
+	ATop,
+	BBottom,
+	BTop,
+	AThreadDepth,
+	AThreadRatio=0.5,
+	AThreadPosition=0.5,
+	AThreadAngle=20,
+	BThreadDepth,
+	BThreadRatio=0.5,
+	BThreadPosition=0.5,
+	BThreadAngle=20,
+	showVertices=false
+	)
+{ 
 	polyPoints=[
-		[Xa+ radiusa*cos(+angleZ),		Ya+ radiusa*sin(+angleZ),		Za ],
-		[Xa+ radiusa*cos(+angleZ),		Ya+ radiusa*sin(+angleZ),		Za + radiusa*tipRatioa ],
-		[Xa ,						Ya ,						Za+ radiusa*(tipRatioa+sin(threadAngleTop)) ],
-		[Xa ,						Ya ,						Za ],
-		[Xa ,						Ya ,						Za+ radiusa*sin(threadAngleBottom) ],
-	
-		[Xb+ radiusb*cos(angleZ+twistZ),	Yb+ radiusb*sin(angleZ+twistZ),	Zb ],
-		[Xb+ radiusb*cos(angleZ+twistZ),	Yb+ radiusb*sin(angleZ+twistZ),	Zb+ radiusb*tipRatiob ],
-		[Xb ,						Yb ,						Zb+ radiusb*(tipRatiob+sin(threadAngleTop)) ],
-		[Xb ,						Yb ,						Zb ],
-		[Xb ,						Yb ,						Zb+ radiusb*sin(threadAngleBottom)] ];
-	
+		AShaftBottom,
+		AShaftTop,
+		ATop,
+		barycenter(ATop,ABottom,AThreadPosition+AThreadRatio/2) + unitVector(ATop-ABottom)*AThreadDepth/2*tan(AThreadAngle),
+		barycenter(ATop,ABottom,AThreadPosition+AThreadRatio/2) - unitVector(ATop-ABottom)*AThreadDepth/2*tan(AThreadAngle) + unitVector(ATop-AShaftTop)*AThreadDepth,
+		barycenter(ATop,ABottom,AThreadPosition),
+		barycenter(ATop,ABottom,AThreadPosition-AThreadRatio/2) + unitVector(ATop-ABottom)*AThreadDepth/2*tan(AThreadAngle) + unitVector(ATop-AShaftTop)*AThreadDepth,
+		barycenter(ATop,ABottom,AThreadPosition-AThreadRatio/2) - unitVector(ATop-ABottom)*AThreadDepth/2*tan(AThreadAngle),
+		ABottom,
+		BTop,
+		barycenter(BTop,BBottom,BThreadPosition+BThreadRatio/2) + unitVector(BTop-BBottom)*BThreadDepth/2*tan(BThreadAngle),
+		barycenter(BTop,BBottom,BThreadPosition+BThreadRatio/2) - unitVector(BTop-BBottom)*BThreadDepth/2*tan(BThreadAngle) + unitVector(BTop-BShaftTop)*BThreadDepth,
+		barycenter(BTop,BBottom,BThreadPosition),
+		barycenter(BTop,BBottom,BThreadPosition-BThreadRatio/2) + unitVector(BTop-BBottom)*BThreadDepth/2*tan(BThreadAngle) + unitVector(BTop-BShaftTop)*BThreadDepth,
+		barycenter(BTop,BBottom,BThreadPosition-BThreadRatio/2) - unitVector(BTop-BBottom)*BThreadDepth/2*tan(BThreadAngle),
+		BBottom,
+		BShaftBottom,
+		BShaftTop
+			];
+
 	polyTriangles=[
-		[ 0, 1, 6 ], [ 0, 6, 5 ], 					// tip of profile
-		[ 1, 7, 6 ], [ 1, 2, 7 ], 					// upper side of profile
-		[ 0, 5, 4 ], [ 4, 5, 9 ], 					// lower side of profile
-		[ 4, 9, 3 ], [ 9, 8, 3 ], [ 3, 8, 2 ], [ 8, 7, 2 ], 	// back of profile
-		[ 0, 4, 3 ], [ 0, 3, 2 ], [ 0, 2, 1 ], 			// a side of profile
-		[ 5, 8, 9 ], [ 5, 7, 8 ], [ 5, 6, 7 ]  			// b side of profile
-		 ];
+		[ 0,1,5], [1,2,3], [1,3,5], [0,5,7], [0,7,8], 			//A side of shaft
+		[1,0,12], [1,10,9], [1,12,10], [0,14,12], [0,15,14], 	// B side of shaft
+		[0,8,15], 								// bottom of shaft
+		[1,9,2], 								// top of shaft
+		[3,2,10], [2,9,10], [4,3,10], [10,11,4], 			// top of thread
+		[6,4,11], [11,13,6], 						// tip of thread
+		[7,6,13], [13,14,7], [8,7,14], [14,15,8], 			// bottom of thread
+		[3,4,5], [5,4,6], [5,6,7], 					// A side of thread
+		[11,10,12], [11,12,13], [12,14,13] 				// B side of thread
+			];
+	
+	if (showVertices==true) for (i=[0:15]) translate(polyPoints[i]) color([1,0.5,0.5]) cube(0.25,true);
 	
 	polyhedron( polyPoints, polyTriangles );
-}
-
-module shaftPiece(Xa, Ya, Za, Xb, Yb, Zb, radiusa, radiusb, tipRatioa, tipRatiob, 
-			threadAngleTop, threadAngleBottom,
-			shaftRatio=0.5, 		// ratio of the thickness of the shaft walls to the shaft radius
-			clearance=0.1,		// radial clearance, normalized to thread height
-			showShaft=false,		// toggles the display of shaft
-			Xc=0, Yc=0, Zc=0, Xd=0, Yd=0, Zd=0, radiusc=0, radiusd=0, tipRatioc=0, tipRatiod=0)
-{	
-	angleZ=atan2(Ya, Xa);
-	twistZ=atan2(Yb, Xb)-atan2(Ya, Xa);
-
-	threadAngleTop=15;
-	threadAngleBottom=-15;
-
-	polyPoints1=[
-		[Xa,						Ya,						Za + radiusa*sin(threadAngleBottom) ],
-		[Xa,						Ya,						Za + radiusa*(tipRatioa+sin(threadAngleTop)) ],
-		[Xa*shaftRatio,				Ya*shaftRatio ,				Za + radiusa*(tipRatioa+sin(threadAngleTop)) ],
-		[Xa*shaftRatio ,				Ya*shaftRatio ,				Za ],
-		[Xa*shaftRatio ,				Ya*shaftRatio ,				Za + radiusa*sin(threadAngleBottom) ],
-	
-		[Xb,						Yb,						Zb + radiusb*sin(threadAngleBottom) ],
-		[Xb,						Yb,						Zb + radiusb*(tipRatiob+sin(threadAngleTop)) ],
-		[Xb*shaftRatio ,				Yb*shaftRatio ,				Zb + radiusb*(tipRatiob+sin(threadAngleTop)) ],
-		[Xb*shaftRatio ,				Yb*shaftRatio ,				Zb ],
-		[Xb*shaftRatio ,				Yb*shaftRatio ,				Zb + radiusb*sin(threadAngleBottom) ] ];
-	
-	polyTriangles1=[
-		[ 0, 1, 6 ], [ 0, 6, 5 ], 					// tip of profile
-		[ 1, 7, 6 ], [ 1, 2, 7 ], 					// upper side of profile
-		[ 0, 5, 4 ], [ 4, 5, 9 ], 					// lower side of profile
-		[ 3, 4, 9 ], [ 9, 8, 3 ], [ 2, 3, 8 ], [ 8, 7, 2 ], 	// back of profile
-		[ 0, 4, 3 ], [ 0, 3, 2 ], [ 0, 2, 1 ], 			// a side of profile
-		[ 5, 8, 9 ], [ 5, 7, 8 ], [ 5, 6, 7 ]  			// b side of profile
-		 ];
-
-	// this is the back of the raised part of the profile, it is always included
-	polyhedron( polyPoints1, polyTriangles1 );
-
-	polyPoints2=[ 
-		[Xa*(1-clearance), 			Ya*(1-clearance), 			Za + radiusa*(tipRatioa+sin(threadAngleTop)) ],
-		[Xc*(1-clearance), 			Yc*(1-clearance) ,			Zc + radiusc*sin(threadAngleBottom) ],
-		[Xc*shaftRatio , 	Yc*shaftRatio , 	Zc + radiusc*sin(threadAngleBottom) ],
-		[Xa*shaftRatio , 	Ya*shaftRatio , 	Za + radiusa*(tipRatioa+sin(threadAngleTop)) ],
-		[Xa*shaftRatio , 	Ya*shaftRatio , 	Za + radiusa*(tipRatioa+sin(threadAngleTop)) ],
-		[Xb*(1-clearance), 			Yb*(1-clearance), 			Zb + radiusb*(tipRatiob+sin(threadAngleTop)) ],
-		[Xd*(1-clearance), 			Yd*(1-clearance), 			Zd + radiusd*sin(threadAngleBottom) ],
-		[Xd*shaftRatio , 	Yd*shaftRatio , 	Zd + radiusd*sin(threadAngleBottom) ],
-		[Xb*shaftRatio , 	Yb*shaftRatio , 	Zb + radiusb*(tipRatiob+sin(threadAngleTop)) ],
-		[Xb*shaftRatio , 	Yb*shaftRatio , 	Zb + radiusb*(tipRatiob+sin(threadAngleTop)) ] ];
-
-	polyTriangles2=[
-		[ 0, 1, 6 ], [ 0, 6, 5 ], 					// tip of profile
-		[ 1, 7, 6 ], [ 1, 2, 7 ], 					// upper side of profile
-		[ 0, 5, 4 ], [ 4, 5, 9 ], 					// lower side of profile
-		[ 3, 4, 9 ], [ 9, 8, 3 ], [ 2, 3, 8 ], [ 8, 7, 2 ], 	// back of profile
-		[ 0, 4, 3 ], [ 0, 3, 2 ], [ 0, 2, 1 ], 			// a side of profile
-		[ 5, 8, 9 ], [ 5, 7, 8 ], [ 5, 6, 7 ] 			// b side of profile
-		];
-
-	// this is the back of the low part of the profile, only included if showShaft is true
-	if (showShaft==true) polyhedron( polyPoints2, polyTriangles2 );
 }
 
 module trapezoidThread(
@@ -104,116 +76,101 @@ module trapezoidThread(
 	RH=true,				// true/false the thread winds clockwise looking along shaft, i.e.follows the Right Hand Rule
 	clearance=0.1,			// radial clearance, normalized to thread height
 	backlash=0.1,			// axial clearance, normalized to pitch
-	stepsPerTurn=24			// number of slices to create per turn
+	stepsPerTurn=24,			// number of slices to create per turn,
+	showVertices=false
 		)
 {
 
-	numberTurns=length/pitch;
+	numberTurns=length/pitch-1;
 		
 	steps=stepsPerTurn*numberTurns;
 
-	trapezoidRatio=				2*profileRatio*(1-backlash);
+	startLength=0.25;	// number of turns for profile to reach full height
 
-	function	threadAngleTop(i)=	threadAngle/2;
-	function	threadAngleBottom(i)=	-threadAngle/2;
+	function 	profileRatio(i)=		profileRatio*(1-backlash);
 
-	function 	threadHeight(i)=		pitch*threadHeightToPitch;
+	function	threadAngle(i)=		threadAngle;
+
+	function	threadPosition(i)=		( profileRatio(i) + threadHeightToPitch*(1+clearance)*tan( threadAngle(i) ) )/2;
+
+	function 	threadHeight(i)=		pitch*threadHeightToPitch*(1+clearance);
 
 	function	pitchRadius(i)=		pitchRadius;
-	function	minorRadius(i)=		pitchRadius(i)-0.5*threadHeight(i);
+	function	minorRadius(i)=		pitchRadius(i)-(0.5+clearance)*pitch*threadHeightToPitch;
+
+	function 	ShaftX(i)= 			0; 
+	function 	ShaftY(i)= 			0;
+	function 	ShaftZ(i)= 			pitch*numberTurns*i;
 	
-	function 	X(i)=				minorRadius(i)*cos(i*360*numberTurns);
-	function 	Y(i)=				minorRadius(i)*sin(i*360*numberTurns);
-	function 	Z(i)=				pitch*numberTurns*i;
-
-	function	tip(i)=			trapezoidRatio*(1-0.5*sin(threadAngleTop(i))+0.5*sin(threadAngleBottom(i)));
-
-	// this is the threaded rod
+	function 	X(i)=				ShaftX(i)+minorRadius(i)*cos(i*360*numberTurns);
+	function 	Y(i)=				ShaftY(i)+minorRadius(i)*sin(i*360*numberTurns);
+	function 	Z(i)=				ShaftZ(i);
 
 	if (RH==true)
-	translate([0,0,-threadHeight(0)*sin(threadAngleBottom(0))])
 	for (i=[0:steps-1])
 	{
-		threadPiece(
-			Xa=				X(i/steps),
-			Ya=				Y(i/steps),
-			Za=				Z(i/steps),
-			Xb=				X((i+1)/steps),
-			Yb=				Y((i+1)/steps), 
-			Zb=				Z((i+1)/steps), 
-			radiusa=			threadHeight(i/steps), 
-			radiusb=			threadHeight((i+1)/steps),
-			tipRatioa=			tip(i/steps),
-			tipRatiob=			tip((i+1)/steps),
-			threadAngleTop=		threadAngleTop(i), 
-			threadAngleBottom=	threadAngleBottom(i)
-			);
-
-		shaftPiece(
-			Xa=				X(i/steps),
-			Ya=				Y(i/steps),
-			Za=				Z(i/steps),
-			Xb=				X((i+1)/steps),
-			Yb=				Y((i+1)/steps), 
-			Zb=				Z((i+1)/steps), 
-			radiusa=			threadHeight(i/steps), 
-			radiusb=			threadHeight((i+1)/steps),
-			tipRatioa=			tip(i/steps),
-			tipRatiob=			tip((i+1)/steps),
-			threadAngleTop=		threadAngleTop(i), 
-			threadAngleBottom=	threadAngleBottom(i),
-			shaftRatio=			0.5,	
-			clearance=			clearance,
-			showShaft=			false
-			);
+	slice( 
+		AShaftBottom= 	[ShaftX(i/steps),				ShaftY(i/steps),				ShaftZ(i/steps)				],
+		AShaftTop= 	[ShaftX((i+stepsPerTurn)/steps),	ShaftY((i+stepsPerTurn)/steps),	ShaftZ((i+stepsPerTurn)/steps)	],
+		BShaftBottom= 	[ShaftX((i+1)/steps),			ShaftY((i+1)/steps),			ShaftZ((i+1)/steps)			],
+		BShaftTop= 	[ShaftX((i+1+stepsPerTurn)/steps),	ShaftY((i+1+stepsPerTurn)/steps),	ShaftZ((i+1+stepsPerTurn)/steps)	],
+		ABottom= 		[X(i/steps),					Y(i/steps),					Z(i/steps)					],
+		ATop= 		[X((i+stepsPerTurn)/steps),		Y((i+stepsPerTurn)/steps),		Z((i+stepsPerTurn)/steps)		],
+		BBottom= 		[X((i+1)/steps),				Y((i+1)/steps),				Z((i+1)/steps)				],
+		BTop= 		[X((i+1+stepsPerTurn)/steps),		Y((i+1+stepsPerTurn)/steps),		Z((i+1+stepsPerTurn)/steps)		],
+		
+		AThreadDepth= 	min(min(i,steps-i)/stepsPerTurn/startLength,1)*threadHeight(i), 
+		AThreadRatio= 	min(min(i,steps-i)/stepsPerTurn/startLength,1)*profileRatio(i),
+		AThreadPosition= 	threadPosition(i),
+		AThreadAngle= 	threadAngle(i),
+		
+		BThreadDepth= 	min(min(i+1,steps-i-1)/stepsPerTurn/startLength,1)*threadHeight(i+1),
+		BThreadRatio= 	min(min(i+1,steps-i-1)/stepsPerTurn/startLength,1)*profileRatio(i+1),
+		BThreadPosition= 	threadPosition(i),
+		BThreadAngle= 	threadAngle(i+1),
+		showVertices=showVertices
+		);
 	}
 
 	if (RH==false)
-	translate([0,0,-threadHeight(0)*sin(threadAngleBottom(0))])
 	mirror([0,1,0])
 	for (i=[0:steps-1])
 	{
-		threadPiece(
-			Xa=				X(i/steps),
-			Ya=				Y(i/steps),
-			Za=				Z(i/steps),
-			Xb=				X((i+1)/steps),
-			Yb=				Y((i+1)/steps), 
-			Zb=				Z((i+1)/steps), 
-			radiusa=			threadHeight(i/steps), 
-			radiusb=			threadHeight((i+1)/steps),
-			tipRatioa=			tip(i/steps),
-			tipRatiob=			tip((i+1)/steps),
-			threadAngleTop=		threadAngleTop(i), 
-			threadAngleBottom=	threadAngleBottom(i)
-			);
-
-		shaftPiece(
-			Xa=				X(i/steps),
-			Ya=				Y(i/steps),
-			Za=				Z(i/steps),
-			Xb=				X((i+1)/steps),
-			Yb=				Y((i+1)/steps), 
-			Zb=				Z((i+1)/steps), 
-			radiusa=			threadHeight(i/steps), 
-			radiusb=			threadHeight((i+1)/steps),
-			tipRatioa=			tip(i/steps),
-			tipRatiob=			tip((i+1)/steps),
-			threadAngleTop=		threadAngleTop(i), 
-			threadAngleBottom=	threadAngleBottom(i),
-			shaftRatio=			0.5,	
-			clearance=			clearance,
-			showShaft=			false
-			);
+	slice( 
+		AShaftBottom= 	[ShaftX(i/steps),				ShaftY(i/steps),				ShaftZ(i/steps)				],
+		AShaftTop= 	[ShaftX((i+stepsPerTurn)/steps),	ShaftY((i+stepsPerTurn)/steps),	ShaftZ((i+stepsPerTurn)/steps)	],
+		BShaftBottom= 	[ShaftX((i+1)/steps),			ShaftY((i+1)/steps),			ShaftZ((i+1)/steps)			],
+		BShaftTop= 	[ShaftX((i+1+stepsPerTurn)/steps),	ShaftY((i+1+stepsPerTurn)/steps),	ShaftZ((i+1+stepsPerTurn)/steps)	],
+		ABottom= 		[X(i/steps),					Y(i/steps),					Z(i/steps)					],
+		ATop= 		[X((i+stepsPerTurn)/steps),		Y((i+stepsPerTurn)/steps),		Z((i+stepsPerTurn)/steps)		],
+		BBottom= 		[X((i+1)/steps),				Y((i+1)/steps),				Z((i+1)/steps)				],
+		BTop= 		[X((i+1+stepsPerTurn)/steps),		Y((i+1+stepsPerTurn)/steps),		Z((i+1+stepsPerTurn)/steps)		],
+		
+		AThreadDepth= 	min(min(i,steps-i)/stepsPerTurn/startLength,1)*threadHeight(i), 
+		AThreadRatio= 	min(min(i,steps-i)/stepsPerTurn/startLength,1)*profileRatio(i),
+		AThreadPosition= 	threadPosition(i),
+		AThreadAngle= 	threadAngle(i),
+		
+		BThreadDepth= 	min(min(i+1,steps-i-1)/stepsPerTurn/startLength,1)*threadHeight(i+1),
+		BThreadRatio= 	min(min(i+1,steps-i-1)/stepsPerTurn/startLength,1)*profileRatio(i+1),
+		BThreadPosition= 	threadPosition(i),
+		BThreadAngle= 	threadAngle(i+1),
+		showVertices=showVertices
+		);
 	}
 
 	rotate([0,0,180/stepsPerTurn])
 	cylinder(
-		h=length+threadHeight(1)*(tip(1)+sin( threadAngleTop(1) )-1*sin( threadAngleBottom(1) ) ),
-		r1=minorRadius(0)-clearance*threadHeight(0),
-		r2=minorRadius(0)-clearance*threadHeight(0),
-		$fn=stepsPerTurn
-			);
+		h=pitch,
+		r1=0.999*pitchRadius-(0.5+clearance)*pitch*threadHeightToPitch,
+		r2=0.999*pitchRadius-(0.5+clearance)*pitch*threadHeightToPitch,$fn=stepsPerTurn);
+
+	translate([0,0,length-pitch])
+	rotate([0,0,180/stepsPerTurn])
+	cylinder(
+		h=pitch,
+		r1=0.999*pitchRadius-(0.5+clearance)*pitch*threadHeightToPitch,
+		r2=0.999*pitchRadius-(0.5+clearance)*pitch*threadHeightToPitch,$fn=stepsPerTurn);
 }
 
 module trapezoidThreadNegativeSpace(
@@ -245,7 +202,7 @@ module trapezoidThreadNegativeSpace(
 	translate([0,0,countersunk*pitch])	
 	translate([0,0,-pitch])
 	trapezoidThread(
-		length=length+0.5*pitch, 				// axial length of the threaded rod 
+		length=length+2*pitch, 				// axial length of the threaded rod 
 		pitch=pitch, 					// axial distance from crest to crest
 		pitchRadius=pitchRadius+clearance*pitch, 	// radial distance from center to mid-profile
 		threadHeightToPitch=threadHeightToPitch, 	// ratio between the height of the profile and the pitch 
@@ -254,9 +211,9 @@ module trapezoidThreadNegativeSpace(
 									// std value for Acme or metric lead screw is 0.5
 		threadAngle=threadAngle,			// angle between the two faces of the thread
 									// std value for Acme is 29 or for metric lead screw is 30
-		RH=true, 						// true/false the thread winds clockwise looking along shaft
+		RH=RH, 						// true/false the thread winds clockwise looking along shaft
 									// i.e.follows  Right Hand Rule
-		clearance=0, 					// radial clearance, normalized to thread height
+		clearance=-clearance,				// radial clearance, normalized to thread height
 		backlash=-backlash, 				// axial clearance, normalized to pitch
 		stepsPerTurn=stepsPerTurn 			// number of slices to create per turn
 			);	
@@ -333,131 +290,103 @@ module trapezoidThreadThroated(
 	RH=true,				// true/false the thread winds clockwise looking along shaft, i.e.follows the Right Hand Rule
 	clearance=0.1,			// radial clearance, normalized to thread height
 	backlash=0.1,			// axial clearance, normalized to pitch
-	stepsPerTurn=24			// number of slices to create per turn
+	stepsPerTurn=24,			// number of slices to create per turn
+	showVertices=false
 		)
 {
-
-	numberTurns=length/pitch;
+	numberTurns=length/pitch-1;
 		
 	steps=stepsPerTurn*numberTurns;
 
-	trapezoidRatio=				2*profileRatio*(1-backlash);
+	startLength=0.25;	// number of turns for profile to reach full height
 
-	function	threadAngleTop(i)=	threadAngle/2;
-	function	threadAngleBottom(i)=	-threadAngle/2;
+	function 	profileRatio(i)=		profileRatio*(1-backlash);
 
-	function 	threadHeight(i)=		pitch*threadHeightToPitch;
+	function	threadAngle(i)=		threadAngle;
+
+	function	threadPosition(i)=		( profileRatio(i) + threadHeightToPitch*(1+clearance)*tan( threadAngle(i) ) )/2;
+
+	function 	threadHeight(i)=		pitch*threadHeightToPitch*(1+clearance);
 
 	// This is where the throating happens
 	function	pitchRadius(i)=		min	(
-						pitchRadius,
-						throatDistance- sqrt ( throatRadius*throatRadius - (Z(i)-throatHeight)*(Z(i)-throatHeight) )
+								pitchRadius,
+								throatDistance- sqrt ( throatRadius*throatRadius - (Z(i)-throatHeight)*(Z(i)-throatHeight) )
 								);	
-			
-	function	minorRadius(i)=		pitchRadius(i)-0.5*threadHeight(i);
+
+	function	minorRadius(i)=		pitchRadius(i)-(0.5+clearance)*pitch*threadHeightToPitch;
+
+	function 	ShaftX(i)= 			0; 
+	function 	ShaftY(i)= 			0;
+	function 	ShaftZ(i)= 			pitch*numberTurns*i;
 	
-	function 	X(i)=				minorRadius(i)*cos(i*360*numberTurns);
-	function 	Y(i)=				minorRadius(i)*sin(i*360*numberTurns);
-	function 	Z(i)=				pitch*numberTurns*i;
-
-	function	tip(i)=			trapezoidRatio*(1-0.5*sin(threadAngleTop(i))+0.5*sin(threadAngleBottom(i)));
-
-	// this is the threaded rod
+	function 	X(i)=				ShaftX(i)+minorRadius(i)*cos(i*360*numberTurns);
+	function 	Y(i)=				ShaftY(i)+minorRadius(i)*sin(i*360*numberTurns);
+	function 	Z(i)=				ShaftZ(i);
 
 	if (RH==true)
-	translate([0,0,-threadHeight(0)*sin(threadAngleBottom(0))])
 	for (i=[0:steps-1])
 	{
-		threadPiece(
-			Xa=				X(i/steps),
-			Ya=				Y(i/steps),
-			Za=				Z(i/steps),
-			Xb=				X((i+1)/steps),
-			Yb=				Y((i+1)/steps), 
-			Zb=				Z((i+1)/steps), 
-			radiusa=			threadHeight(i/steps), 
-			radiusb=			threadHeight((i+1)/steps),
-			tipRatioa=			tip(i/steps),
-			tipRatiob=			tip((i+1)/steps),
-			threadAngleTop=		threadAngleTop(i), 
-			threadAngleBottom=	threadAngleBottom(i)
-			);
-
-		shaftPiece(
-			Xa=				X(i/steps),
-			Ya=				Y(i/steps),
-			Za=				Z(i/steps),
-			Xb=				X((i+1)/steps),
-			Yb=				Y((i+1)/steps), 
-			Zb=				Z((i+1)/steps), 
-			radiusa=			threadHeight(i/steps), 
-			radiusb=			threadHeight((i+1)/steps),
-			tipRatioa=			tip(i/steps),
-			tipRatiob=			tip((i+1)/steps),
-			threadAngleTop=		threadAngleTop(i), 
-			threadAngleBottom=	threadAngleBottom(i),
-			shaftRatio=			0.1,	
-			clearance=			clearance,
-			showShaft=			true,
-			Xc=				X((i+stepsPerTurn)/steps),
-			Yc=				Y((i+stepsPerTurn)/steps),
-			Zc=				Z((i+stepsPerTurn)/steps),
-			Xd=				X((i+stepsPerTurn+1)/steps),
-			Yd=				Y((i+stepsPerTurn+1)/steps), 
-			Zd=				Z((i+stepsPerTurn+1)/steps), 
-			radiusc=			threadHeight((i+stepsPerTurn)/steps), 
-			radiusd=			threadHeight((i+stepsPerTurn+1)/steps),
-			tipRatioc=			tip((i+stepsPerTurn)/steps),
-			tipRatiod=			tip((i+stepsPerTurn+1)/steps )
-			);
+	slice( 
+		AShaftBottom= 	[ShaftX(i/steps),				ShaftY(i/steps),				ShaftZ(i/steps)				],
+		AShaftTop= 	[ShaftX((i+stepsPerTurn)/steps),	ShaftY((i+stepsPerTurn)/steps),	ShaftZ((i+stepsPerTurn)/steps)	],
+		BShaftBottom= 	[ShaftX((i+1)/steps),			ShaftY((i+1)/steps),			ShaftZ((i+1)/steps)			],
+		BShaftTop= 	[ShaftX((i+1+stepsPerTurn)/steps),	ShaftY((i+1+stepsPerTurn)/steps),	ShaftZ((i+1+stepsPerTurn)/steps)	],
+		ABottom= 		[X(i/steps),					Y(i/steps),					Z(i/steps)					],
+		ATop= 		[X((i+stepsPerTurn)/steps),		Y((i+stepsPerTurn)/steps),		Z((i+stepsPerTurn)/steps)		],
+		BBottom= 		[X((i+1)/steps),				Y((i+1)/steps),				Z((i+1)/steps)				],
+		BTop= 		[X((i+1+stepsPerTurn)/steps),		Y((i+1+stepsPerTurn)/steps),		Z((i+1+stepsPerTurn)/steps)		],
+		
+		AThreadDepth= 	min(min(i,steps-i)/stepsPerTurn/startLength,1)*threadHeight(i), 
+		AThreadRatio= 	min(min(i,steps-i)/stepsPerTurn/startLength,1)*profileRatio(i),
+		AThreadPosition= 	threadPosition(i),
+		AThreadAngle= 	threadAngle(i),
+		
+		BThreadDepth= 	min(min(i+1,steps-i-1)/stepsPerTurn/startLength,1)*threadHeight(i+1),
+		BThreadRatio= 	min(min(i+1,steps-i-1)/stepsPerTurn/startLength,1)*profileRatio(i+1),
+		BThreadPosition= 	threadPosition(i),
+		BThreadAngle= 	threadAngle(i+1),
+		showVertices=showVertices
+		);
 	}
 
 	if (RH==false)
-	translate([0,0,-threadHeight(0)*sin(threadAngleBottom(0))])
 	mirror([0,1,0])
 	for (i=[0:steps-1])
 	{
-		threadPiece(
-			Xa=				X(i/steps),
-			Ya=				Y(i/steps),
-			Za=				Z(i/steps),
-			Xb=				X((i+1)/steps),
-			Yb=				Y((i+1)/steps), 
-			Zb=				Z((i+1)/steps), 
-			radiusa=			threadHeight(i/steps), 
-			radiusb=			threadHeight((i+1)/steps),
-			tipRatioa=			tip(i/steps),
-			tipRatiob=			tip((i+1)/steps),
-			threadAngleTop=		threadAngleTop(i), 
-			threadAngleBottom=	threadAngleBottom(i)
-			);
-
-		shaftPiece(
-			Xa=				X(i/steps),
-			Ya=				Y(i/steps),
-			Za=				Z(i/steps),
-			Xb=				X((i+1)/steps),
-			Yb=				Y((i+1)/steps), 
-			Zb=				Z((i+1)/steps), 
-			radiusa=			threadHeight(i/steps), 
-			radiusb=			threadHeight((i+1)/steps),
-			tipRatioa=			tip(i/steps),
-			tipRatiob=			tip((i+1)/steps),
-			threadAngleTop=		threadAngleTop(i), 
-			threadAngleBottom=	threadAngleBottom(i),
-			shaftRatio=			0.1,	
-			clearance=			clearance,
-			showShaft=			true,
-			Xc=				X((i+stepsPerTurn)/steps),
-			Yc=				Y((i+stepsPerTurn)/steps),
-			Zc=				Z((i+stepsPerTurn)/steps),
-			Xd=				X((i+stepsPerTurn+1)/steps),
-			Yd=				Y((i+stepsPerTurn+1)/steps), 
-			Zd=				Z((i+stepsPerTurn+1)/steps), 
-			radiusc=			threadHeight((i+stepsPerTurn)/steps), 
-			radiusd=			threadHeight((i+stepsPerTurn+1)/steps),
-			tipRatioc=			tip((i+stepsPerTurn)/steps),
-			tipRatiod=			tip((i+stepsPerTurn+1)/steps )
-			);
+	slice( 
+		AShaftBottom= 	[ShaftX(i/steps),				ShaftY(i/steps),				ShaftZ(i/steps)				],
+		AShaftTop= 	[ShaftX((i+stepsPerTurn)/steps),	ShaftY((i+stepsPerTurn)/steps),	ShaftZ((i+stepsPerTurn)/steps)	],
+		BShaftBottom= 	[ShaftX((i+1)/steps),			ShaftY((i+1)/steps),			ShaftZ((i+1)/steps)			],
+		BShaftTop= 	[ShaftX((i+1+stepsPerTurn)/steps),	ShaftY((i+1+stepsPerTurn)/steps),	ShaftZ((i+1+stepsPerTurn)/steps)	],
+		ABottom= 		[X(i/steps),					Y(i/steps),					Z(i/steps)					],
+		ATop= 		[X((i+stepsPerTurn)/steps),		Y((i+stepsPerTurn)/steps),		Z((i+stepsPerTurn)/steps)		],
+		BBottom= 		[X((i+1)/steps),				Y((i+1)/steps),				Z((i+1)/steps)				],
+		BTop= 		[X((i+1+stepsPerTurn)/steps),		Y((i+1+stepsPerTurn)/steps),		Z((i+1+stepsPerTurn)/steps)		],
+		
+		AThreadDepth= 	min(min(i,steps-i)/stepsPerTurn/startLength,1)*threadHeight(i), 
+		AThreadRatio= 	min(min(i,steps-i)/stepsPerTurn/startLength,1)*profileRatio(i),
+		AThreadPosition= 	threadPosition(i),
+		AThreadAngle= 	threadAngle(i),
+		
+		BThreadDepth= 	min(min(i+1,steps-i-1)/stepsPerTurn/startLength,1)*threadHeight(i+1),
+		BThreadRatio= 	min(min(i+1,steps-i-1)/stepsPerTurn/startLength,1)*profileRatio(i+1),
+		BThreadPosition= 	threadPosition(i),
+		BThreadAngle= 	threadAngle(i+1),
+		showVertices=showVertices
+		);
 	}
+
+	rotate([0,0,180/stepsPerTurn])
+	cylinder(
+		h=pitch,
+		r1=0.999*pitchRadius-(0.5+clearance)*pitch*threadHeightToPitch,
+		r2=0.999*pitchRadius-(0.5+clearance)*pitch*threadHeightToPitch,$fn=stepsPerTurn);
+
+	translate([0,0,length-pitch])
+	rotate([0,0,180/stepsPerTurn])
+	cylinder(
+		h=pitch,
+		r1=0.999*pitchRadius-(0.5+clearance)*pitch*threadHeightToPitch,
+		r2=0.999*pitchRadius-(0.5+clearance)*pitch*threadHeightToPitch,$fn=stepsPerTurn);
 }

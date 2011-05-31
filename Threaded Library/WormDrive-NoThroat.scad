@@ -11,7 +11,7 @@ radius=15;
 pitch=2*3.1415*pitchRadius/numberTeeth;
 
 angle=-360*$t;
-offset=-11;
+offset=4;
 
 distance=radius+pitchRadius+0.0*pitch;
 
@@ -32,7 +32,7 @@ rotate([0,0,180+angle])
 						// std value for Acme or metric lead screw is 0.5
 	profileRatio=0.5,			 // ratio between the lengths of the raised part of the profile and the pitch
 						// std value for Acme or metric lead screw is 0.5
-	threadAngle=40, 			// angle between the two faces of the thread
+	threadAngle=20, 			// angle between the two faces of the thread
 						// std value for Acme is 29 or for metric lead screw is 30
 	RH=true, 				// true/false the thread winds clockwise looking along shaft, i.e.follows the Right Hand Rule
 	clearance=0.2, 			// radial clearance, normalized to thread height
