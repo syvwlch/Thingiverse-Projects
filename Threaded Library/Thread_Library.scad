@@ -5,6 +5,8 @@ function unitVector(vector) = vector / norm ( vector );
 
 function barycenter(vector1, vector2, ratio) = (vector1*ratio + vector2*(1-ratio) );
 
+function moveUp(vector, o = 0.1) = [vector[0], vector[1], vector[2] + o];
+
 module slice( 
 	AShaftBottom,
 	AShaftTop,
@@ -27,15 +29,15 @@ module slice(
 { 
 	polyPoints=[
 		AShaftBottom,
-		AShaftTop,
-		ATop,
+		moveUp(AShaftTop),
+		moveUp(ATop),
 		barycenter(ATop,ABottom,AThreadPosition+AThreadRatio/2) + unitVector(ATop-ABottom)*AThreadDepth/2*tan(AThreadAngle),
 		barycenter(ATop,ABottom,AThreadPosition+AThreadRatio/2) - unitVector(ATop-ABottom)*AThreadDepth/2*tan(AThreadAngle) + unitVector(ATop-AShaftTop)*AThreadDepth,
 		barycenter(ATop,ABottom,AThreadPosition),
 		barycenter(ATop,ABottom,AThreadPosition-AThreadRatio/2) + unitVector(ATop-ABottom)*AThreadDepth/2*tan(AThreadAngle) + unitVector(ATop-AShaftTop)*AThreadDepth,
 		barycenter(ATop,ABottom,AThreadPosition-AThreadRatio/2) - unitVector(ATop-ABottom)*AThreadDepth/2*tan(AThreadAngle),
 		ABottom,
-		BTop,
+		moveUp(BTop),
 		barycenter(BTop,BBottom,BThreadPosition+BThreadRatio/2) + unitVector(BTop-BBottom)*BThreadDepth/2*tan(BThreadAngle),
 		barycenter(BTop,BBottom,BThreadPosition+BThreadRatio/2) - unitVector(BTop-BBottom)*BThreadDepth/2*tan(BThreadAngle) + unitVector(BTop-BShaftTop)*BThreadDepth,
 		barycenter(BTop,BBottom,BThreadPosition),
