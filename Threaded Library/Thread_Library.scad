@@ -255,7 +255,7 @@ module trapezoidNut(
 				);
 		
 		trapezoidThreadNegativeSpace(
-			length=length, 					// axial length of the threaded rod 
+			length=length + pitch, 					// axial length of the threaded rod 
 			pitch=pitch, 					// axial distance from crest to crest
 			pitchRadius=pitchRadius, 			// radial distance from center to mid-profile
 			threadHeightToPitch=threadHeightToPitch, 	// ratio between the height of the profile and the pitch 
